@@ -13,7 +13,7 @@ import (
 	"github.com/bluele/gcache"
 	"github.com/carr123/batchwriter"
 	"github.com/gomodule/redigo/redis"
-	uuid "github.com/satori/go.uuid"
+	uuid "github.com/google/uuid"
 )
 
 /*
@@ -132,20 +132,20 @@ func redisPoolInit(server, password string) *redis.Pool {
 //登录后创建新cookie,存入缓存
 //48 bytes + userid
 func (s *SessionMgr) NewSession(userid string) (string, error) {
-	id1, err := uuid.NewV4()
+	id1, err := uuid.NewUUID()
 	if err != nil {
 		return "", err
 	}
 
-	randstr := hex.EncodeToString(id1.Bytes()) //32 bytes
-	sessID := randstr + calcSig(randstr)       //32 bytes + 16 bytes
+	randstr := hex.EncodeToString(id1[:]) //32 bytes
+	sessID := randstr + calcSig(randstr)  //32 bytes + 16 bytes
 
 	if len(userid) == 0 {
-		id2, err := uuid.NewV4()
+		id2, err := uuid.NewUUID()
 		if err != nil {
 			return "", err
 		}
-		userid = hex.EncodeToString(id2.Bytes())
+		userid = hex.EncodeToString(id2[:])
 	}
 
 	session := sessID + userid //48 bytes + userid
